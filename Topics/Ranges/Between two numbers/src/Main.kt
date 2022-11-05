@@ -1,0 +1,1 @@
+fun main() = println(List(3) { readln().toInt() }.let { it[0] in it[1]..it[2]})
