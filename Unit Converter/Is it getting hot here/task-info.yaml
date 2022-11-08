@@ -254,6 +254,9 @@ files:
 - name: test/Task5Test.kt
   visible: true
   learner_created: true
+- name: test/Task4Test.kt
+  visible: true
+  learner_created: true
 feedback_link: https://hyperskill.org/learn/step/6094#comment
 status: Unchecked
 record: -1

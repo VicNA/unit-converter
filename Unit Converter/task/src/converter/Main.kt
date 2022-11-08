@@ -1,6 +1,6 @@
 package converter
 
-enum class Unit(val type: String, val supportUnits: List<String>, val rate: Double) {
+enum class Unit(val type: String, val names: List<String>, val rate: Double) {
     METERS("length", listOf("m", "meter", "meters"), 1.0),
     KILOMETERS("length", listOf("km", "kilometer", "kilometers"), 1000.0),
     CENTIMETERS("length", listOf("cm", "centimeter", "centimeters"), 0.01),
@@ -16,31 +16,35 @@ enum class Unit(val type: String, val supportUnits: List<String>, val rate: Doub
     POUNDS("weight", listOf("lb", "pound", "pounds"), 453.592),
     OUNCES("weight", listOf("oz", "ounce", "ounces"), 28.3495);
 
-    companion object {
-        fun findUnit(string: String) = Unit.values().find { string in it.supportUnits }
+    fun equalsType(unit: Unit) = this.type == unit.type
 
-        fun equalsType(unitA: Unit, unitB: Unit) = unitA.type == unitB.type
+    companion object {
+        fun findUnit(string: String) = Unit.values().find { string in it.names }
     }
 }
 
 
 fun main() {
+    var s1: String
+    var s2: String
     while (true) {
         print("Enter what you want to convert (or exit): ")
         val input = readln()
         if (input == "exit") break
 
         val list = input.split(' ')
-        val srcUnit = Unit.findUnit(list[1].lowercase())
-        val trgUnit = Unit.findUnit(list[3].lowercase())
-        if (srcUnit == null || trgUnit == null || !Unit.equalsType(srcUnit, trgUnit)) {
+        s1 = if (list.size > 4) list[2].lowercase() else list[1].lowercase()
+        s2 = list.last()
+        val srcUnit = Unit.findUnit(s1)
+        val trgUnit = Unit.findUnit(s2)
+        if (srcUnit == null || trgUnit == null || !srcUnit.equalsType(trgUnit)) {
             println("Conversion from ${srcUnit?.name?.lowercase() ?: "???"} to ${trgUnit?.name?.lowercase() ?: "???"} is impossible\n")
             continue
         }
-
-        val num = (list[0].toDouble() * srcUnit.rate) / trgUnit.rate
-        val s1 = if (list[0].toDouble() == 1.0) srcUnit.supportUnits[1] else srcUnit.supportUnits[2]
-        val s2 = if (num == 1.0) trgUnit.supportUnits[1] else trgUnit.supportUnits[2]
-        println("${list[0].toDouble()} $s1 is $num $s2\n")
+//
+//        val num = (list[0].toDouble() * srcUnit.rate) / trgUnit.rate
+//        val s1 = if (list[0].toDouble() == 1.0) srcUnit.names[1] else srcUnit.names[2]
+//        val s2 = if (num == 1.0) trgUnit.names[1] else trgUnit.names[2]
+//        println("${list[0].toDouble()} $s1 is $num $s2\n")
     }
 }
