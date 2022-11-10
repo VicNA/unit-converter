@@ -1,7 +1,11 @@
 package converter
 
 enum class TypeUnit {
-    LENGTH, WEIGHT, TEMPERATURE, UNKNOWN
+    LENGTH, WEIGHT, TEMPERATURE, UNKNOWN;
+
+    override fun toString(): String {
+        return name[0] + name.drop(1).lowercase()
+    }
 }
 
 enum class Unit(val rate: (Double) -> Double, val type: TypeUnit, vararg val names: String) {
@@ -72,7 +76,7 @@ fun main() {
         val fromUnit = Unit.find(if (list.size > 4) list[2].lowercase() else list[1].lowercase())
         val toUnit = Unit.find(list.last().lowercase())
         if (fromNumber < 0 && fromUnit.type == TypeUnit.LENGTH || fromUnit.type == TypeUnit.WEIGHT) {
-            println("${fromUnit.type.name.lowercase().replaceFirstChar { it.uppercase() }} shouldn't be negative\n")
+            println("${fromUnit.type.name} shouldn't be negative\n")
             continue
         }
 
