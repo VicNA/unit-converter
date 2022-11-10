@@ -62,16 +62,26 @@ fun main() {
         if (input == "exit") break
 
         val list = input.split(' ')
+
+        val fromNumber = list[0].toDoubleOrNull()
+        if (fromNumber == null) {
+            println("Parse error\n")
+            continue
+        }
+
         val fromUnit = Unit.find(if (list.size > 4) list[2].lowercase() else list[1].lowercase())
         val toUnit = Unit.find(list.last().lowercase())
-        val converter = Converter(fromUnit, toUnit)
+        if (fromNumber < 0 && fromUnit.type == TypeUnit.LENGTH || fromUnit.type == TypeUnit.WEIGHT) {
+            println("${fromUnit.type.name.lowercase().replaceFirstChar { it.uppercase() }} shouldn't be negative\n")
+            continue
+        }
 
+        val converter = Converter(fromUnit, toUnit)
         if (!converter.isConverted()) {
             println("Conversion from ${fromUnit.pluralName} to ${toUnit.pluralName} is impossible\n")
             continue
         }
 
-        val fromNumber = list[0].toDouble()
         val toNumber = converter.convertTo(fromNumber)
         val s1 = if (fromNumber == 1.0) fromUnit.onlyName else fromUnit.pluralName
         val s2 = if (toNumber == 1.0) toUnit.onlyName else toUnit.pluralName
