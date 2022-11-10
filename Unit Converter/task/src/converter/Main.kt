@@ -1,115 +1,80 @@
 package converter
 
-enum class Length(val rate: Double, vararg val names: String) {
-    METERS      (1.0,     "meter", "m", "meters"),
-    KILOMETERS  (1000.0,  "kilometer", "km", "kilometers"),
-    CENTIMETERS (0.01,    "centimeter", "cm", "centimeters"),
-    MILLIMETERS (0.001,   "millimeter", "mm", "millimeters"),
-    MILES       (1609.35, "mile", "mi", "miles"),
-    YARDS       (0.9144,  "yard", "yd", "yards"),
-    FEET        (0.3048,  "foot", "ft", "feet"),
-    INCHES      (0.0254,  "inch", "in", "inches");
+enum class TypeUnit {
+    LENGTH, WEIGHT, TEMPERATURE, UNKNOWN
+}
 
-    fun convertTo(value: Double, target: Length) = (value * rate) / target.rate
+enum class Unit(val rate: (Double) -> Double, val type: TypeUnit, vararg val names: String) {
+    METERS      ({ m -> m },                TypeUnit.LENGTH, "meter", "m", "meters"),
+    KILOMETERS  ({ km -> km * 1000.0 },     TypeUnit.LENGTH, "kilometer", "km", "kilometers"),
+    CENTIMETERS ({ cm -> cm * 0.01 },       TypeUnit.LENGTH, "centimeter", "cm", "centimeters"),
+    MILLIMETERS ({ mm -> mm * 0.001 },      TypeUnit.LENGTH, "millimeter", "mm", "millimeters"),
+    MILES       ({ mi -> mi * 1609.35 },    TypeUnit.LENGTH, "mile", "mi", "miles"),
+    YARDS       ({ yd -> yd * 0.9144 },     TypeUnit.LENGTH, "yard", "yd", "yards"),
+    FEET        ({ ft -> ft * 0.3048 },     TypeUnit.LENGTH, "foot", "ft", "feet"),
+    INCHES      ({ inch -> inch * 0.0254 }, TypeUnit.LENGTH, "inch", "in", "inches"),
 
-    val only = names.first()
-    val plural = names.last()
+    GRAMS       ({ g -> g },             TypeUnit.WEIGHT, "gram", "g", "grams"),
+    KILOGRAMS   ({ kg -> kg * 1000.0 },  TypeUnit.WEIGHT, "kilogram", "kg", "kilograms"),
+    MILLIGRAMS  ({ mg -> mg * 0.001 },   TypeUnit.WEIGHT, "milligram", "mg", "milligrams"),
+    POUNDS      ({ lb -> lb * 453.592 }, TypeUnit.WEIGHT, "pound", "lb", "pounds"),
+    OUNCES      ({ oz -> oz * 28.3495 }, TypeUnit.WEIGHT, "ounce", "oz", "ounces"),
+
+    CELSIUS     ({ c -> c },     TypeUnit.TEMPERATURE, "degree Celsius", "c", "dc", "celsius", "degrees Celsius"),
+    FAHRENHEIT  ({ f -> f },     TypeUnit.TEMPERATURE, "degree Fahrenheit", "f", "df", "fahrenheit", "degrees Fahrenheit"),
+    KELVINS     ({ k -> k },     TypeUnit.TEMPERATURE, "kelvin", "k", "kelvins"),
+
+    UNKNOWN     ({ 0.0 },     TypeUnit.UNKNOWN, "???");
+
+    val onlyName = names.first()
+    val pluralName = names.last()
 
     companion object {
         private val values = values()
-        fun find(string: String) = values.find { string in it.names }
+        fun find(string: String) = values.find { string in it.names } ?: UNKNOWN
     }
 }
 
-enum class Weight(val rate: Double, vararg val names: String) {
-    GRAMS       (1.0,     "gram", "g", "grams"),
-    KILOGRAMS   (1000.0,  "kilogram", "kg", "kilograms"),
-    MILLIGRAMS  (0.001,   "milligram", "mg", "milligrams"),
-    POUNDS      (453.592, "pound", "lb", "pounds"),
-    OUNCES      (28.3495, "ounce", "oz", "ounces");
+class Converter(val fromUnit: Unit, val toUnit: Unit) {
 
-    fun convertTo(value: Double, target: Weight) = (value * rate) / target.rate
+    fun isConverted() = fromUnit.type != TypeUnit.UNKNOWN && toUnit.type != TypeUnit.UNKNOWN
+            && fromUnit.type == toUnit.type
 
-    val only = names.first()
-    val plural = names.last()
-
-    companion object {
-        private val values = values()
-        fun find(string: String) = values.find { string in it.names }
-    }
-}
-
-enum class Temperature(vararg val names: String) {
-    CELSIUS     ("degree Celsius", "c", "dc", "celsius", "degrees Celsius"),
-    FAHRENHEIT  ("degree Fahrenheit", "r", "df", "fahrenheit", "degrees Fahrenheit"),
-    KELVINS     ("kelvin", "k", "kelvins");
-
-
-
-    val only = names.first()
-    val plural = names.last()
-
-    companion object {
-        private val values = values()
-        fun find(string: String) = values.find { string in it.names }
-    }
-}
-
-class Converter(from: String, to: String) {
-//    val fromUnit = Length.find(from) ?: Weight.find(from) ?: Temperature.find(from)
-    val fromUnit = from.let { Length.find(it) ?: Weight.find(it) ?: Temperature.find(it) }
-    val toUnit = find(to)
-
-    fun isPossible(): Boolean {
-        if (fromUnit != null && toUnit != null) {
-            if (fromUnit is Length && toUnit is Length) return true
-            if (fromUnit is Weight && toUnit is Weight) return true
-            if (fromUnit is Temperature && toUnit is Temperature) return true
-        }
-        return false
-    }
-
-    fun convertTo() {
-        return when (toUnit) {
-            fromUnit == Temperature.CELSIUS && toUnit == Temperature.KELVINS ->
+    fun convertTo(value: Double): Double {
+        return when {
+            fromUnit == Unit.CELSIUS && toUnit == Unit.KELVINS -> fromUnit.rate(value) + 273.15
+            fromUnit == Unit.CELSIUS && toUnit == Unit.FAHRENHEIT -> fromUnit.rate(value) * 9 / 5 + 32
+            fromUnit == Unit.FAHRENHEIT && toUnit == Unit.CELSIUS -> (fromUnit.rate(value) - 32) * 5 / 9
+            fromUnit == Unit.FAHRENHEIT && toUnit == Unit.KELVINS -> (fromUnit.rate(value) + 459.67) * 5 / 9
+            fromUnit == Unit.KELVINS && toUnit == Unit.CELSIUS -> fromUnit.rate(value) - 273.15
+            fromUnit == Unit.KELVINS && toUnit == Unit.FAHRENHEIT -> fromUnit.rate(value) * 9 / 5 - 459.67
+            fromUnit == toUnit -> fromUnit.rate(value)
+            else -> fromUnit.rate(value) / toUnit.rate(1.0)
         }
     }
-
-//    companion object {
-//        fun find(string: String) = Length.values().find { string in it.names } ?:
-//            Weight.values().find { string in it.names } ?:
-//            Temperature.values().find { string in it.names }
-//    }
 }
 
 
 fun main() {
-    var s1: String
-    var s2: String
     while (true) {
         print("Enter what you want to convert (or exit): ")
         val input = readln()
         if (input == "exit") break
 
         val list = input.split(' ')
-        s1 = if (list.size > 4) list[2].lowercase() else list[1].lowercase()
-        s2 = list.last()
-//        val converter = Converter(s1, s2)
-//        if (converter.isPossible()) {
-//            println("Conversion from ${srcUnit?.name?.lowercase() ?: "???"} to ${trgUnit?.name?.lowercase() ?: "???"} is impossible\n")
-//            continue
-//
-//        }
-//        enumValueOf<Length>().names
-//        val srcUnit = Converter.toUnit(s1)
-//        val trgUnit = Converter.toUnit(s2)
-//        if (srcUnit == null || trgUnit == null || !srcUnit.equalsType(trgUnit)) {
-//        }
-//        println(srcUnit?.name)
-//
-//        val num = (list[0].toDouble() * srcUnit.rate) / trgUnit.rate
-//        val s1 = if (list[0].toDouble() == 1.0) srcUnit.names[1] else srcUnit.names[2]
-//        val s2 = if (num == 1.0) trgUnit.names[1] else trgUnit.names[2]
-//        println("${list[0].toDouble()} $s1 is $num $s2\n")
+        val fromUnit = Unit.find(if (list.size > 4) list[2].lowercase() else list[1].lowercase())
+        val toUnit = Unit.find(list.last().lowercase())
+        val converter = Converter(fromUnit, toUnit)
+
+        if (!converter.isConverted()) {
+            println("Conversion from ${fromUnit.pluralName} to ${toUnit.pluralName} is impossible\n")
+            continue
+        }
+
+        val fromNumber = list[0].toDouble()
+        val toNumber = converter.convertTo(fromNumber)
+        val s1 = if (fromNumber == 1.0) fromUnit.onlyName else fromUnit.pluralName
+        val s2 = if (toNumber == 1.0) toUnit.onlyName else toUnit.pluralName
+        println("$fromNumber $s1 is $toNumber $s2\n")
     }
 }
