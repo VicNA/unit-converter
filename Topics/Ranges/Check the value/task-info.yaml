@@ -1,11 +1,5 @@
 type: choice
-is_multiple_choice: true
-options:
-- text: 16 in range
-- text: 17 in range
-- text: 18 in range
-- text: 19 in range
-- text: 20 in range
+is_multiple_choice: false
 files:
 - name: src/Main.kt
   visible: true
