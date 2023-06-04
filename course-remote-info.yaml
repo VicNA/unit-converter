@@ -3,7 +3,7 @@ hyperskill_project:
   ide_files: https://stepik.org/media/attachments/lesson/225500/additional_files.json
   is_template_based: false
   use_ide: true
-update_date: "Fri, 11 Nov 2022 12:07:10 UTC"
+update_date: "Sun, 04 Jun 2023 05:33:48 UTC"
 stages:
 - id: 385
   step: 6090
@@ -45,14 +45,14 @@ topics:
     theory_id: 17408
   - title: Data types
     theory_id: 4388
-  - title: Invoking functions
-    theory_id: 4575
-  - title: Standard input
-    theory_id: 4445
   - title: The classification of basic types
     theory_id: 4455
   - title: Type conversion
     theory_id: 4672
+  - title: Invoking functions
+    theory_id: 4575
+  - title: Standard input with Java Scanner
+    theory_id: 4445
   - title: Reading data with a readln
     theory_id: 11224
   - title: String basics
@@ -102,7 +102,7 @@ topics:
     theory_id: 4631
   - title: IntelliJ IDEA
     theory_id: 3801
-  - title: IDEA Basics
+  - title: IntelliJ IDEA basics
     theory_id: 5819
   - title: EduTools
     theory_id: 5839
@@ -112,6 +112,8 @@ topics:
   - title: While loops
     theory_id: 4659
   4:
+  - title: Paradigms
+    theory_id: 15860
   - title: Introduction to OOP
     theory_id: 3614
   - title: Objects
